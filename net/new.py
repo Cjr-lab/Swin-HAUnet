@@ -710,7 +710,7 @@ class SwinTransformerSys(nn.Module):
         # TODO: change this
         # build decoder layers  top->down
         self.layers_up = nn.ModuleList()
-        out_dims += [None]  # 最后一个没有上采样
+        out_dims += [None]  
         for i_layer in range(self.num_layers):
             self.layers_up.append(
                 BasicLayer_up(res_dim=int(embed_dim * 2 ** i_layer),  # from res
