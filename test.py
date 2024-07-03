@@ -11,10 +11,8 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from datasets.dataset_synapse import Synapse_dataset
 from utils import test_single_volume
-from networks.vision_transformer import SwinHAUnet as ViT_seg
+from net.vision_transformer import SwinHAUnet as ViT_seg
 from trainer import trainer_synapse
-from networks.Unet import UNet
-from networks.net1 import Sgformer_U
 from exited_net.M4oE.vision_transformer import SwinUnet
 
 from config import get_config
@@ -72,7 +70,7 @@ parser.add_argument('--throughput', action='store_true', help='Test throughput o
 
 args = parser.parse_args()
 if args.dataset == "Synapse":
-    args.volume_path = os.path.join(args.volume_path, "test_vol_h5")  # ./Synapse/test_vol_h5
+    args.volume_path = os.path.join(args.volume_path, "test_vol_h5")  
 config = get_config(args)
 
 
@@ -104,7 +102,7 @@ def inference(args, model, test_save_path=None):
     mean_hd95 = np.mean(metric_list, axis=0)[1]
     logging.info('Testing performance in best val model: mean_dice : %f mean_hd95 : %f' % (
         performance, mean_hd95))
-    print("best val model mean_dice : %f mean_hd95 : %f" % (performance, mean_hd95))     # dice range(0,1) 越接近1效果越好。hd95越小越好
+    print("best val model mean_dice : %f mean_hd95 : %f" % (performance, mean_hd95))     
     return "Testing Finished!"
 
 
