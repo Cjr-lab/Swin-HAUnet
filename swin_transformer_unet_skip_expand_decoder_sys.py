@@ -693,14 +693,14 @@ class SwinTransformerSys(nn.Module):
 
     #Encoder and Bottleneck
     def forward_features(self, x):
-        x = self.patch_embed(x)             # 将输入的图片x进行patch embedding，将图像分割成小的patch并转换成向量表示
+        x = self.patch_embed(x)            
         if self.ape:
-            x = x + self.absolute_pos_embed   # 如果模型配置中包含绝对位置嵌入（absolute position embedding），
-                                              # 则将输入的特征向量x与绝对位置嵌入相加，以引入绝对位置信息。
-        x = self.pos_drop(x)                 # 对位置编码之后的特征向量进行dropout操作，以防止过拟合。
-        x_downsample = []                    # 创建一个空列表x_downsample，用于存储特征下采样之后的结果
+            x = x + self.absolute_pos_embed  
+                                            
+        x = self.pos_drop(x)                 
+        x_downsample = []                    
 
-        for layer in self.layers:            # 遍历Swin Transformer的各个层，在每一层中将当前的特征x加入到x_downsample列表中，然后经过当前层的处理得到新的特征表示x。
+        for layer in self.layers:           
             x_downsample.append(x)
             x = layer(x)
 
