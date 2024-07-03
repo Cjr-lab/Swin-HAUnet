@@ -34,7 +34,7 @@ class DiceLoss(nn.Module):
             inputs = torch.softmax(inputs, dim=1)
         target = self._one_hot_encoder(target)
         if weight is None:
-            weight = [1] * self.n_classes    #  如果没有提供权重参数，则将权重初始化为一个长度为 self.n_classes 的列表，每个元素初始值为 1
+            weight = [1] * self.n_classes   
         assert inputs.size() == target.size(), 'predict {} & target {} shape do not match'.format(inputs.size(), target.size())
         class_wise_dice = []
         loss = 0.0
@@ -114,24 +114,24 @@ def calculate_miou(input, target, classNum):
     :return:
     '''
 
-    inputTmp = torch.zeros([input.shape[0], classNum, input.shape[1], input.shape[2]]).cuda()  # 创建[b,c,h,w]大小的0矩阵
-    targetTmp = torch.zeros([target.shape[0], classNum, target.shape[1], target.shape[2]]).cuda()  # 同上
-    input = input.unsqueeze(1)  # 将input维度扩充为[b,1,h,w]
-    target = target.unsqueeze(1)  # 同上
-    inputOht = inputTmp.scatter_(index=input, dim=1, value=1)  # input作为索引，将0矩阵转换为onehot矩阵
-    targetOht = targetTmp.scatter_(index=target, dim=1, value=1)  # 同上
-    batchMious = []  # 为该batch中每张图像存储一个miou
-    mul = inputOht * targetOht  # 乘法计算后，其中1的个数为intersection
-    for i in range(input.shape[0]):  # 遍历图像
+    inputTmp = torch.zeros([input.shape[0], classNum, input.shape[1], input.shape[2]]).cuda()  
+    targetTmp = torch.zeros([target.shape[0], classNum, target.shape[1], target.shape[2]]).cuda()  
+    input = input.unsqueeze(1) 
+    target = target.unsqueeze(1)  
+    inputOht = inputTmp.scatter_(index=input, dim=1, value=1)  
+    targetOht = targetTmp.scatter_(index=target, dim=1, value=1)  
+    batchMious = []  
+    mul = inputOht * targetOht 
+    for i in range(input.shape[0]):  
         ious = []
-        for j in range(classNum):  # 遍历类别，包括背景
-            intersection = torch.sum(mul[i][j])  # + 1e-6   #TP 1e-6用于出现mask全黑情况
+        for j in range(classNum):  
+            intersection = torch.sum(mul[i][j]) 
             union = torch.sum(inputOht[i][j]) + torch.sum(targetOht[i][j]) - intersection + 1e-6 #FN+TP+FP
             if union == 1e-6:
                 continue
             iou = intersection / union
             ious.append(iou.item())
-        miou = np.mean(ious)  # 计算该图像的miou
+        miou = np.mean(ious) 
         batchMious.append(miou)
     return np.mean(batchMious)
 
@@ -143,22 +143,22 @@ def calculate_mdice(input, target, classNum):
     :param classNum: scalar
     :return:
     '''
-    inputTmp = torch.zeros([input.shape[0], classNum, input.shape[1], input.shape[2]]).cuda()  # 创建[b,c,h,w]大小的0矩阵
-    targetTmp = torch.zeros([target.shape[0], classNum, target.shape[1], target.shape[2]]).cuda()  # 同上
-    input = input.unsqueeze(1)  # 将input维度扩充为[b,1,h,w]
-    target = target.unsqueeze(1)  # 同上
-    inputOht = inputTmp.scatter_(index=input, dim=1, value=1)  # input作为索引，将0矩阵转换为onehot矩阵
-    targetOht = targetTmp.scatter_(index=target, dim=1, value=1)  # 同上
-    batchMious = []  # 为该batch中每张图像存储一个miou
-    mul = inputOht * targetOht  # 乘法计算后，其中1的个数为intersection
-    for i in range(input.shape[0]):  # 遍历图像
+    inputTmp = torch.zeros([input.shape[0], classNum, input.shape[1], input.shape[2]]).cuda()  
+    targetTmp = torch.zeros([target.shape[0], classNum, target.shape[1], target.shape[2]]).cuda()  
+    input = input.unsqueeze(1) 
+    target = target.unsqueeze(1)  
+    inputOht = inputTmp.scatter_(index=input, dim=1, value=1)  
+    targetOht = targetTmp.scatter_(index=target, dim=1, value=1)  
+    batchMious = [] 
+    mul = inputOht * targetOht 
+    for i in range(input.shape[0]):  
         dices = []
-        for j in range(classNum):  # 遍历类别，包括背景
+        for j in range(classNum): 
             intersection = 2 * torch.sum(mul[i][j]) + 1e-6  # 2TP
             union = torch.sum(inputOht[i][j]) + torch.sum(targetOht[i][j]) + 1e-6  #FN+2TP+FP
             dice = intersection / union
             dices.append(dice.item())
-        Dice = np.mean(dices)  # 计算该图像的Dice
+        Dice = np.mean(dices) 
         batchMious.append(Dice)
     return np.mean(batchMious)
 
@@ -231,17 +231,17 @@ def calculate_fwiou(input, target, classNum):
     :param classNum: scalar
     :return:
     '''
-    inputTmp = torch.zeros([input.shape[0], classNum, input.shape[1], input.shape[2]]).cuda()  # 创建[b,c,h,w]大小的0矩阵
-    targetTmp = torch.zeros([target.shape[0], classNum, target.shape[1], target.shape[2]]).cuda()  # 同上
-    input = input.unsqueeze(1)  # 将input维度扩充为[b,1,h,w]
-    target = target.unsqueeze(1)  # 同上
-    inputOht = inputTmp.scatter_(index=input, dim=1, value=1)  # input作为索引，将0矩阵转换为onehot矩阵
-    targetOht = targetTmp.scatter_(index=target, dim=1, value=1)  # 同上
-    batchFwious = []  # 为该batch中每张图像存储一个miou
-    mul = inputOht * targetOht  # 乘法计算后，其中1的个数为intersection
-    for i in range(input.shape[0]):  # 遍历图像
+    inputTmp = torch.zeros([input.shape[0], classNum, input.shape[1], input.shape[2]]).cuda() 
+    targetTmp = torch.zeros([target.shape[0], classNum, target.shape[1], target.shape[2]]).cuda() 
+    input = input.unsqueeze(1) 
+    target = target.unsqueeze(1) 
+    inputOht = inputTmp.scatter_(index=input, dim=1, value=1) 
+    targetOht = targetTmp.scatter_(index=target, dim=1, value=1)  
+    batchFwious = [] 
+    mul = inputOht * targetOht 
+    for i in range(input.shape[0]): 
         fwious = []
-        for j in range(classNum):  # 遍历类别，包括背景
+        for j in range(classNum): 
             TP_FN = torch.sum(targetOht[i][j])
             intersection = torch.sum(mul[i][j]) + 1e-6
             union = torch.sum(inputOht[i][j]) + torch.sum(targetOht[i][j]) - intersection + 1e-6
@@ -250,7 +250,7 @@ def calculate_fwiou(input, target, classNum):
             iou = intersection / union
             fwiou = (TP_FN / (input.shape[2] * input.shape[3])) * iou
             fwious.append(fwiou.item())
-        fwiou = np.mean(fwious)  # 计算该图像的miou
+        fwiou = np.mean(fwious)  
         # print(miou)
         batchFwious.append(fwiou)
     return np.mean(batchFwious)
