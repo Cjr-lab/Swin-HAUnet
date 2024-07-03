@@ -639,7 +639,7 @@ class SwinTransformerSys(nn.Module):
             self.layers.append(layer)
         
         # build decoder layers
-        self.layers_up = nn.ModuleList()  # 用于存储模型的子模块（layers）
+        self.layers_up = nn.ModuleList()  
         self.concat_back_dim = nn.ModuleList()
         for i_layer in range(self.num_layers):
             concat_linear = nn.Linear(2*int(embed_dim*2**(self.num_layers-1-i_layer)),
@@ -661,8 +661,8 @@ class SwinTransformerSys(nn.Module):
                                 norm_layer=norm_layer,
                                 upsample=PatchExpand if (i_layer < self.num_layers - 1) else None,
                                 use_checkpoint=use_checkpoint)
-            self.layers_up.append(layer_up) # 存储神经网络各层的列表
-            self.concat_back_dim.append(concat_linear) # 768,374,192
+            self.layers_up.append(layer_up)
+            self.concat_back_dim.append(concat_linear) 
 
         self.norm = norm_layer(self.num_features)
         self.norm_up= norm_layer(self.embed_dim)
@@ -693,14 +693,14 @@ class SwinTransformerSys(nn.Module):
 
     #Encoder and Bottleneck
     def forward_features(self, x):
-        x = self.patch_embed(x)             # 将输入的图片x进行patch embedding，将图像分割成小的patch并转换成向量表示
+        x = self.patch_embed(x)             
         if self.ape:
-            x = x + self.absolute_pos_embed   # 如果模型配置中包含绝对位置嵌入（absolute position embedding），
-                                              # 则将输入的特征向量x与绝对位置嵌入相加，以引入绝对位置信息。
-        x = self.pos_drop(x)                 # 对位置编码之后的特征向量进行dropout操作，以防止过拟合。
-        x_downsample = []                    # 创建一个空列表x_downsample，用于存储特征下采样之后的结果
+            x = x + self.absolute_pos_embed  
+                                              
+        x = self.pos_drop(x)                
+        x_downsample = []                  
 
-        for layer in self.layers:            # 遍历Swin Transformer的各个层，在每一层中将当前的特征x加入到x_downsample列表中，然后经过当前层的处理得到新的特征表示x。
+        for layer in self.layers:           
             x_downsample.append(x)
             x = layer(x)
 
@@ -715,7 +715,7 @@ class SwinTransformerSys(nn.Module):
                 x = layer_up(x)
             else:
                 x = torch.cat([x,x_downsample[3-inx]],-1)
-                x = self.concat_back_dim[inx](x)# 对拼接后的特征进行线性变换
+                x = self.concat_back_dim[inx](x)
                 x = layer_up(x)
 
         x = self.norm_up(x)  # B L C
@@ -736,9 +736,9 @@ class SwinTransformerSys(nn.Module):
         return x
 
     def forward(self, x):
-        x, x_downsample = self.forward_features(x)  # enecoder and downsample
-        x = self.forward_up_features(x,x_downsample)  # decoder
-        x = self.up_x4(x)  # upsample
+        x, x_downsample = self.forward_features(x) 
+        x = self.forward_up_features(x,x_downsample)  
+        x = self.up_x4(x) 
 
         return x
 
