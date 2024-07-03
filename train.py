@@ -5,8 +5,7 @@ import random
 import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
-from networks.vision_transformer import SwinHAUnet
-from networks.net import Sgformer_U
+from net.vision_transformer import SwinHAUnet
 from trainer import trainer_synapse
 from config import get_config
 
@@ -65,9 +64,6 @@ if args.dataset == "Synapse":
     args.root_path = os.path.join(args.root_path, "train_npz")
 config = get_config(args)
 
-# import os
-# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
 if __name__ == "__main__":
     if not args.deterministic:
         cudnn.benchmark = True
@@ -100,7 +96,7 @@ if __name__ == "__main__":
     
     print(config)
     
-    net = SwinHAUnet(config,img_size=args.img_size, num_classes=args.num_classes).cuda() # input size 1×224×224，numclass 9
+    net = SwinHAUnet(config,img_size=args.img_size, num_classes=args.num_classes).cuda()
     net.load_from(config)
     
     trainer = {'Synapse': trainer_synapse, }
