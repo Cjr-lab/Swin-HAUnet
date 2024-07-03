@@ -639,7 +639,7 @@ class SwinTransformerSys(nn.Module):
             self.layers.append(layer)
         
         # build decoder layers
-        self.layers_up = nn.ModuleList()  # 用于存储模型的子模块（layers）
+        self.layers_up = nn.ModuleList()  
         self.concat_back_dim = nn.ModuleList()
         for i_layer in range(self.num_layers):
             concat_linear = nn.Linear(2*int(embed_dim*2**(self.num_layers-1-i_layer)),
@@ -661,7 +661,7 @@ class SwinTransformerSys(nn.Module):
                                 norm_layer=norm_layer,
                                 upsample=PatchExpand if (i_layer < self.num_layers - 1) else None,
                                 use_checkpoint=use_checkpoint)
-            self.layers_up.append(layer_up) # 存储神经网络各层的列表
+            self.layers_up.append(layer_up) 
             self.concat_back_dim.append(concat_linear) # 768,374,192
 
         self.norm = norm_layer(self.num_features)
@@ -715,7 +715,7 @@ class SwinTransformerSys(nn.Module):
                 x = layer_up(x)
             else:
                 x = torch.cat([x,x_downsample[3-inx]],-1)
-                x = self.concat_back_dim[inx](x)# 对拼接后的特征进行线性变换
+                x = self.concat_back_dim[inx](x)
                 x = layer_up(x)
 
         x = self.norm_up(x)  # B L C
@@ -736,9 +736,9 @@ class SwinTransformerSys(nn.Module):
         return x
 
     def forward(self, x):
-        x, x_downsample = self.forward_features(x)  # enecoder and downsample
-        x = self.forward_up_features(x,x_downsample)  # decoder
-        x = self.up_x4(x)  # upsample
+        x, x_downsample = self.forward_features(x) 
+        x = self.forward_up_features(x,x_downsample)  
+        x = self.up_x4(x) 
 
         return x
 
