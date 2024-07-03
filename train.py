@@ -7,9 +7,6 @@ import torch
 import torch.backends.cudnn as cudnn
 from networks.vision_transformer import SwinHAUnet
 from networks.net import Sgformer_U
-# from networks.new import SwinTransformerSys as SwinHAUnet
-# from networks.Unet import UNet
-# from networks.sgformer import sgformer_s
 from trainer import trainer_synapse
 from config import get_config
 
@@ -103,14 +100,9 @@ if __name__ == "__main__":
     
     print(config)
     
-    # net = SwinHAUnet(config, img_size=args.img_size, num_classes=args.num_classes).cuda()
-    # net = UNet(1,n_classes=args.num_classes).cuda()
-    # net = Sgformer_U(img_size=args.img_size,in_chans=1, num_class=args.num_classes).cuda()  # input size 1×224×224，numclass 9
     net = SwinHAUnet(config,img_size=args.img_size, num_classes=args.num_classes).cuda() # input size 1×224×224，numclass 9
     net.load_from(config)
     
     trainer = {'Synapse': trainer_synapse, }
     trainer[dataset_name](args, net, args.output_dir)
-    #
-    # x = torch.randn(2, 3, 224, 224).cuda()
-    # print(net(x).shape)
+ 
